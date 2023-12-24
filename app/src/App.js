@@ -2,8 +2,10 @@ import { ethers } from 'ethers';
 import { useEffect, useState } from 'react';
 import deploy from './deploy';
 import Escrow from './Escrow';
+import axios from 'axios'
 
 const provider = new ethers.providers.Web3Provider(window.ethereum);
+const serverEndpoint = 'http://localhost:3001'
 
 export async function approve(escrowContract, signer) {
   const approveTxn = await escrowContract.connect(signer).approve();
@@ -24,14 +26,24 @@ function App() {
     }
 
     getAccounts();
+
+
+    async function getContracts() {
+      const response = await axios.get(`${serverEndpoint}/contracts`)
+
+      console.log(response);
+
+      setEscrows(response.data.contracts || [])
+    }
+
+    getContracts()
   }, [account]);
 
   async function newContract() {
     const beneficiary = document.getElementById('beneficiary').value;
     const arbiter = document.getElementById('arbiter').value;
-
-    const wei = parseInt(document.getElementById('ether').value)*1000000000000000000
-    const value = ethers.BigNumber.from(wei);
+    const wei = ethers.utils.parseUnits(document.getElementById('ether').value, "ether")
+    const value = ethers.BigNumber.from(`${wei}`);
     const escrowContract = await deploy(signer, arbiter, beneficiary, value);
 
 
@@ -52,7 +64,8 @@ function App() {
       },
     };
 
-    setEscrows([...escrows, escrow]);
+    axios.post(`${serverEndpoint}/contract`, escrow)
+      .then(response => setEscrows([...escrows, escrow]))
   }
 
   return (
