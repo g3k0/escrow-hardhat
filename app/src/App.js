@@ -29,7 +29,9 @@ function App() {
   async function newContract() {
     const beneficiary = document.getElementById('beneficiary').value;
     const arbiter = document.getElementById('arbiter').value;
-    const value = ethers.BigNumber.from(document.getElementById('wei').value);
+
+    const wei = parseInt(document.getElementById('ether').value)*1000000000000000000
+    const value = ethers.BigNumber.from(wei);
     const escrowContract = await deploy(signer, arbiter, beneficiary, value);
 
 
@@ -75,8 +77,8 @@ function App() {
           </label>
 
           <label>
-            Deposit Amount (in Wei)
-            <input type="text" id="wei" />
+            Deposit Amount (in Ether)
+            <input type="text" id="ether" />
           </label>
 
           <div
